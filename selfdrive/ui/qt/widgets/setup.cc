@@ -159,7 +159,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
 
   QPixmap hkgpix("../assets/offroad/hkg.png");
   QLabel *hkg = new QLabel();
-  hkg->setPixmap(hkgpix.scaledToWidth(450, Qt::SmoothTransformation));
+  hkg->setPixmap(hkgpix.scaledToWidth(480, Qt::SmoothTransformation));
   hkg->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
   finishRegistationLayout->addWidget(hkg, 0, Qt::AlignCenter);
 
@@ -206,17 +206,6 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
 
   qrLayout->addWidget(new PairingQRWidget, 1);
 
-  QPushButton* backButton = new QPushButton("뒤로가기");
-  backButton->setFixedHeight(100);
-  backButton->setStyleSheet(R"(
-    border-radius: 30px;
-    font-size: 45px;
-    font-weight: 500;
-    background: #585858;
-  )");
-  qrLayout->addWidget(backButton);
-  QObject::connect(backButton, &QPushButton::released, this, &SetupWidget::parseError);
-
   QWidget* q = new QWidget;
   q->setLayout(qrLayout);
   mainLayout->addWidget(q);
@@ -255,7 +244,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
   RequestRepeater* repeater = new RequestRepeater(this, url, "ApiCache_Device", 86400); // 5
 
   QObject::connect(repeater, &RequestRepeater::receivedResponse, this, &SetupWidget::replyFinished);
-  //QObject::connect(repeater, &RequestRepeater::failedResponse, this, &SetupWidget::parseError);
+  QObject::connect(repeater, &RequestRepeater::failedResponse, this, &SetupWidget::parseError);
   hide(); // Only show when first request comes back
 }
 
