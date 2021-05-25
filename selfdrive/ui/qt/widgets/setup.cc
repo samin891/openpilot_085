@@ -255,7 +255,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
   RequestRepeater* repeater = new RequestRepeater(this, url, "ApiCache_Device", 86400); // 5
 
   QObject::connect(repeater, &RequestRepeater::receivedResponse, this, &SetupWidget::replyFinished);
-  QObject::connect(repeater, &RequestRepeater::failedResponse, this, &SetupWidget::parseError);
+  //QObject::connect(repeater, &RequestRepeater::failedResponse, this, &SetupWidget::parseError);
   hide(); // Only show when first request comes back
 }
 
