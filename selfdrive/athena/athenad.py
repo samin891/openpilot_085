@@ -32,8 +32,8 @@ from selfdrive.swaglog import cloudlog, SWAGLOG_DIR
 import selfdrive.crash as crash
 from selfdrive.version import dirty, origin, branch, commit
 
-#ATHENA_HOST = os.getenv('ATHENA_HOST', 'wss://10.128.254.254')
-ATHENA_HOST = os.getenv('ATHENA_HOST', 'wss://athena.comma.ai')
+ATHENA_HOST = os.getenv('ATHENA_HOST', 'wss://10.128.254.254')
+#ATHENA_HOST = os.getenv('ATHENA_HOST', 'wss://athena.comma.ai')
 HANDLER_THREADS = int(os.getenv('HANDLER_THREADS', "4"))
 LOCAL_PORT_WHITELIST = set([8022])
 
