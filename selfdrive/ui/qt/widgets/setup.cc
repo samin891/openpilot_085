@@ -165,14 +165,14 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
 
   //QLabel* registrationDescription = new QLabel("QR코드 스캐너를 이용하여\n장치를 페어링 하세요");
   //QLabel* registrationDescription = new QLabel("COMMA CONNECT 앱을 이용하여 장치를 페어링 하세요");
-  registrationDescription->setWordWrap(true);
-  registrationDescription->setAlignment(Qt::AlignCenter);
-  registrationDescription->setStyleSheet(R"(
-    font-size: 45px;
-    font-weight: 400;
-  )");
+  //registrationDescription->setWordWrap(true);
+  //registrationDescription->setAlignment(Qt::AlignCenter);
+  //registrationDescription->setStyleSheet(R"(
+  //  font-size: 45px;
+  //  font-weight: 400;
+  //)");
 
-  finishRegistationLayout->addWidget(registrationDescription);
+  //finishRegistationLayout->addWidget(registrationDescription);
 
   QPushButton* finishButton = new QPushButton("QR코드 확인");
   //QPushButton* finishButton = new QPushButton("설정 및 완료");
