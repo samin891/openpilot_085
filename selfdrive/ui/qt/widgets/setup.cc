@@ -159,7 +159,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
 
   QPixmap hkgpix("../assets/offroad/hkg.png");
   QLabel *hkg = new QLabel();
-  hkg->setPixmap(hkgpix.scaledToWidth(480, Qt::SmoothTransformation));
+  hkg->setPixmap(hkgpix.scaledToWidth(450, Qt::SmoothTransformation));
   hkg->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
   finishRegistationLayout->addWidget(hkg, 0, Qt::AlignCenter);
 
