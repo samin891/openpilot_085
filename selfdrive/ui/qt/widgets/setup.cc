@@ -159,7 +159,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
 
   QPixmap hkgpix("../assets/offroad/hkg.png");
   QLabel *hkg = new QLabel();
-  hkg->setPixmap(hkgpix.scaledToWidth(430, Qt::SmoothTransformation));
+  hkg->setPixmap(hkgpix.scaledToWidth(450, Qt::SmoothTransformation));
   hkg->setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
   finishRegistationLayout->addWidget(hkg, 0, Qt::AlignCenter);
 
@@ -176,7 +176,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
 
   QPushButton* finishButton = new QPushButton("QR코드 확인");
   //QPushButton* finishButton = new QPushButton("설정 및 완료");
-  finishButton->setFixedHeight(120);
+  finishButton->setFixedHeight(150);
   finishButton->setStyleSheet(R"(
     border-radius: 30px;
     font-size: 45px;
