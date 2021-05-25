@@ -235,7 +235,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
   // set up API requests
   QString dongleId = QString::fromStdString(Params().get("DongleId"));
   QString url = "https://api.commadotai.com/v1.1/devices/" + dongleId + "/";
-  RequestRepeater* repeater = new RequestRepeater(this, "", "", 5);
+  RequestRepeater* repeater = new RequestRepeater(this, "https://127.0.0.1/", "", 5);
   //RequestRepeater* repeater = new RequestRepeater(this, url, "ApiCache_Device", 5);
 
   QObject::connect(repeater, &RequestRepeater::receivedResponse, this, &SetupWidget::replyFinished);
