@@ -9,7 +9,7 @@ WEBCAM = os.getenv("WEBCAM") is not None
 EnableLogger = Params().get_bool('OpkrEnableLogger')
 EnableUploader = Params().get_bool('OpkrEnableUploader')
 
-if EnableLogger:
+if EnableLogger and not EnableUploader:
   procs = [
     DaemonProcess("manage_athenad", "selfdrive.athena.manage_athenad", "AthenadPid"),
     # due to qualcomm kernel bugs SIGKILLing camerad sometimes causes page table corruption
