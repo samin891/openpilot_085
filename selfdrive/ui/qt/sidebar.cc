@@ -139,11 +139,11 @@ void Sidebar::paintEvent(QPaintEvent *event) {
   p.drawImage(60, 1080 - 180 - 40, home_img);
 
   // network
-  p.drawImage(58, 196, signal_imgs[strength]);
+  p.drawImage(58, 196, net_strength);
   configFont(p, "Open Sans", 35, "Regular");
   p.setPen(QColor(0xff, 0xff, 0xff));
   const QRect r = QRect(50, 237, 100, 50);
-  p.drawText(r, Qt::AlignCenter, network_type[net_type]);
+  p.drawText(r, Qt::AlignCenter, net_type);
 
   // metrics
   drawMetric(p, "시스템온도", QString("%1°C").arg(temp_val), temp_status, 338);
