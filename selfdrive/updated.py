@@ -198,7 +198,7 @@ def init_overlay() -> None:
     run(mount_cmd)
 
   #git_diff = run(["git", "diff"], OVERLAY_MERGED, low_priority=True)
-  #params.put("GitDiff", git_diff)
+  params.put("GitDiff", "")
   #cloudlog.info(f"git diff output:\n{git_diff}")
 
 
