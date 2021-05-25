@@ -50,11 +50,11 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
                                   this));
 
   if (!Hardware::TICI()) {
-  toggles.append(new ParamControl("IsUploadRawEnabled",
-                                 "Upload Raw Logs",
-                                 "Upload full logs and full resolution video by default while on WiFi. If not enabled, individual logs can be marked for upload at my.comma.ai/useradmin.",
-                                 "../assets/offroad/icon_network.png",
-                                 this));
+    toggles.append(new ParamControl("IsUploadRawEnabled",
+                                   "주행 로그 업로드",
+                                   "업로드 프로세스 활성화 시 모든 로그 및 풀 해상도 비디오를 업로드합니다.(WiFi 사용중에만 작동) 기능이 꺼진 경우, my.comma.ai/useradmin에 업로드를 위해 개별 로그는 기록될 수 있습니다.",
+                                   "../assets/offroad/icon_network.png",
+                                   this));
   }
 
   ParamControl *record_toggle = new ParamControl("RecordFront",
@@ -98,7 +98,7 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
                                   this));
   toggles.append(new ParamControl("OpkrEnableUploader",
                                   "주행로그 서버 전송(사용주의-설명참조)",
-                                  "주행로그를 콤마서버로 전송합니다. 판다 세이프티 코드 및 모니터링 수치를 수정한 경우는 활성화하지 마십시오. 기기가 콤마 네트워크로부터 차단되며 standalone상태로만 동작됩니다.",
+                                  "시스템로그 및 기타 주행데이터를 콤마서버로 전송하기 위해 업로드 프로세스를 활성화 합니다. 판다 세이프티 코드 및 모니터링 수치를 수정한 경우는 활성화하지 마십시오. 기기가 콤마 네트워크로부터 차단되며 standalone상태로만 동작됩니다.",
                                   "../assets/offroad/icon_shell.png",
                                   this));
   toggles.append(new ParamControl("MadModeEnabled",
