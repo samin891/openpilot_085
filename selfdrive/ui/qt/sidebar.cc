@@ -150,7 +150,7 @@ void Sidebar::paintEvent(QPaintEvent *event) {
   // metrics
   drawMetric(p, "시스템온도", QString("%1°C").arg(temp_val), temp_status, 338);
   drawMetric(p, panda_str, "", panda_status, 518);
-  drawMetric(p, "네트워크\n" + connect_str, "", connect_status, 676);
+  drawMetric(p, "인터넷\n" + connect_str, "", connect_status, 676);
 
   // atom - ip
   if( m_batteryPercent <= 1) return;
