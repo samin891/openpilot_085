@@ -90,8 +90,10 @@ void Sidebar::updateState(const UIState &s) {
     setProperty("connectStatus", warning_color);
   } else {
     bool online = nanos_since_boot() - last_ping < 80e9;
-    setProperty("connectStr",  online ? "온라인" : "오류");
-    setProperty("connectStatus", online ? good_color : danger_color);
+    setProperty("connectStr",  online ? "온라인" : "온라인");
+    setProperty("connectStatus", online ? good_color : good_color);
+    //setProperty("connectStr",  online ? "온라인" : "오류");
+    //setProperty("connectStatus", online ? good_color : danger_color);
   }
 
   QColor tempStatus = danger_color;
