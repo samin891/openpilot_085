@@ -10,6 +10,8 @@
 #include "selfdrive/common/params.h"
 #include "selfdrive/common/util.h"
 #include "selfdrive/ui/qt/home.h"
+#include "selfdrive/ui/qt/widgets/input.h"
+
 
 void TrainingGuide::mouseReleaseEvent(QMouseEvent *e) {
   QPoint touch = QPoint(e->x(), e->y()) - imageCorner;
@@ -77,11 +79,13 @@ void TermsPage::showEvent(QShowEvent *event) {
   QObject *obj = (QObject*)text->rootObject();
   QObject::connect(obj, SIGNAL(qmlSignal()), SLOT(enableAccept()));
 
-  // TODO: add decline page
   QHBoxLayout* buttons = new QHBoxLayout;
   main_layout->addLayout(buttons);
 
   buttons->addWidget(new QPushButton("거절"));
+  buttons->addWidget(decline_btn);
+  QObject::connect(decline_btn, &QPushButton::released, this, &TermsPage::declinedTerms);
+
   buttons->addSpacing(50);
 
   accept_btn = new QPushButton("스크롤하여 진행");
@@ -101,14 +105,57 @@ void TermsPage::showEvent(QShowEvent *event) {
 }
 
 void TermsPage::enableAccept(){
-  accept_btn->setText("수락");
+  accept_btn->setText("동의");
   accept_btn->setEnabled(true);
   return;
 }
 
+void DeclinePage::showEvent(QShowEvent *event) {
+  if (layout()) {
+    return;
+  }
+
+  QVBoxLayout *main_layout = new QVBoxLayout;
+  main_layout->setMargin(40);
+  main_layout->setSpacing(40);
+
+  QLabel *text = new QLabel(this);
+  text->setText("오픈파일럿 사용을 위해서는 약관 및 조건에 동의해야 합니다.");
+  text->setStyleSheet(R"(font-size: 50px;)");
+  main_layout->addWidget(text, 0, Qt::AlignCenter);
+
+  QHBoxLayout* buttons = new QHBoxLayout;
+  main_layout->addLayout(buttons);
+
+  back_btn = new QPushButton("뒤로가기");
+  buttons->addWidget(back_btn);
+  buttons->addSpacing(50);
+
+  QObject::connect(back_btn, &QPushButton::released, this, &DeclinePage::getBack);
+
+  uninstall_btn = new QPushButton("거절, 오픈파일럿 제거");
+  uninstall_btn->setStyleSheet("background-color: #E22C2C;");
+  buttons->addWidget(uninstall_btn);
+
+  QObject::connect(uninstall_btn, &QPushButton::released, [=](){
+    if (ConfirmationDialog::confirm("제거하시겠습니까?", this)) {
+      Params().putBool("DoUninstall", true);
+    }
+  });
+
+  setLayout(main_layout);
+  setStyleSheet(R"(
+    QPushButton {
+      padding: 50px;
+      font-size: 50px;
+      border-radius: 10px;
+      background-color: #292929;
+    }
+  )");
+}
+
 void OnboardingWindow::updateActiveScreen() {
-  bool accepted_terms = params.get("HasAcceptedTerms", false).compare(current_terms_version) == 0;
-  bool training_done = params.get("CompletedTrainingVersion", false).compare(current_training_version) == 0;
+  updateOnboardingStatus();
 
   if (!accepted_terms) {
     setCurrentIndex(0);
@@ -139,6 +186,17 @@ OnboardingWindow::OnboardingWindow(QWidget *parent) : QStackedWidget(parent) {
   });
   addWidget(tr);
 
+  DeclinePage* declinePage = new DeclinePage(this);
+  addWidget(declinePage);
+
+  connect(terms, &TermsPage::declinedTerms, [=](){
+    setCurrentIndex(2);
+  });
+
+  connect(declinePage, &DeclinePage::getBack, [=](){
+    updateActiveScreen();
+  });
+
   setStyleSheet(R"(
     * {
       color: white;
@@ -156,4 +214,14 @@ OnboardingWindow::OnboardingWindow(QWidget *parent) : QStackedWidget(parent) {
   )");
 
   updateActiveScreen();
+}
+
+void OnboardingWindow::updateOnboardingStatus() {
+  accepted_terms = params.get("HasAcceptedTerms", false).compare(current_terms_version) == 0;
+  training_done = params.get("CompletedTrainingVersion", false).compare(current_training_version) == 0;
+}
+
+bool OnboardingWindow::isOnboardingDone() {
+  updateOnboardingStatus();
+  return accepted_terms && training_done;
 }

@@ -7,16 +7,41 @@
 #include "selfdrive/ui/paint.h"
 #include "selfdrive/ui/qt/util.h"
 
+#ifdef ENABLE_MAPS
+#include "selfdrive/ui/qt/maps/map.h"
+#endif
+
 OnroadWindow::OnroadWindow(QWidget *parent) : QWidget(parent) {
-  layout = new QStackedLayout();
+  layout = new QStackedLayout(this);
   layout->setStackingMode(QStackedLayout::StackAll);
 
   // old UI on bottom
   nvg = new NvgWindow(this);
-  layout->addWidget(nvg);
   QObject::connect(this, &OnroadWindow::update, nvg, &NvgWindow::update);
 
+  QHBoxLayout* split = new QHBoxLayout();
+  split->setContentsMargins(0, 0, 0, 0);
+  split->setSpacing(0);
+  split->addWidget(nvg);
+
+#ifdef ENABLE_MAPS
+  QString token = QString::fromStdString(Params().get("MapboxToken"));
+  if (!token.isEmpty()){
+    QMapboxGLSettings settings;
+    settings.setCacheDatabasePath("/tmp/mbgl-cache.db");
+    settings.setCacheDatabaseMaximumSize(20 * 1024 * 1024);
+    settings.setAccessToken(token.trimmed());
+    map = new MapWindow(settings);
+    split->addWidget(map);
+  }
+#endif
+
+  QWidget * split_wrapper = new QWidget;
+  split_wrapper->setLayout(split);
+  layout->addWidget(split_wrapper);
+
   alerts = new OnroadAlerts(this);
+  alerts->setAttribute(Qt::WA_TransparentForMouseEvents, true);
   QObject::connect(this, &OnroadWindow::update, alerts, &OnroadAlerts::updateState);
   QObject::connect(this, &OnroadWindow::offroadTransition, alerts, &OnroadAlerts::offroadTransition);
   layout->addWidget(alerts);
@@ -50,7 +75,7 @@ void OnroadAlerts::updateState(const UIState &s) {
                            Hardware::MIN_VOLUME, Hardware::MAX_VOLUME);
     }
   }
-  if (s.scene.deviceState.getStarted()) {
+  if (sm["deviceState"].getDeviceState().getStarted()) {
     if (sm.updated("controlsState")) {
       const cereal::ControlsState::Reader &cs = sm["controlsState"].getControlsState();
       updateAlert(QString::fromStdString(cs.getAlertText1()), QString::fromStdString(cs.getAlertText2()),
@@ -123,17 +148,15 @@ void OnroadAlerts::stopSounds() {
 void OnroadAlerts::paintEvent(QPaintEvent *event) {
   QPainter p(this);
 
+  if (alert_size == cereal::ControlsState::AlertSize::NONE) {
+    return;
+  }
   static std::map<cereal::ControlsState::AlertSize, const int> alert_sizes = {
-    {cereal::ControlsState::AlertSize::NONE, 0},
     {cereal::ControlsState::AlertSize::SMALL, 271},
     {cereal::ControlsState::AlertSize::MID, 420},
     {cereal::ControlsState::AlertSize::FULL, height()},
   };
   int h = alert_sizes[alert_size];
-  if (h == 0) {
-    return;
-  }
-
   QRect r = QRect(0, height() - h, width(), h);
 
   // draw background + gradient
@@ -166,10 +189,9 @@ void OnroadAlerts::paintEvent(QPaintEvent *event) {
     configFont(p, "Open Sans", 66, "Regular");
     p.drawText(QRect(0, c.y() + 21, width(), 90), Qt::AlignHCenter, text2);
   } else if (alert_size == cereal::ControlsState::AlertSize::FULL) {
-    // TODO: offset from center to match old NVG UI, but why was it this way?
     bool l = text1.length() > 15;
     configFont(p, "Open Sans", l ? 132 : 177, "Bold");
-    p.drawText(QRect(0, r.y() + (l ? 240 : 270), width(), 350), Qt::AlignHCenter | Qt::TextWordWrap, text1);
+    p.drawText(QRect(0, r.y() + (l ? 240 : 270), width(), 600), Qt::AlignHCenter | Qt::TextWordWrap, text1);
     configFont(p, "Open Sans", 88, "Regular");
     p.drawText(QRect(0, r.height() - (l ? 361 : 420), width(), 300), Qt::AlignHCenter | Qt::TextWordWrap, text2);
   }
@@ -202,6 +224,10 @@ void NvgWindow::update(const UIState &s) {
     makeCurrent();
   }
   repaint();
+}
+
+void NvgWindow::resizeGL(int w, int h) {
+  ui_resize(&QUIState::ui_state, w, h);
 }
 
 void NvgWindow::paintGL() {

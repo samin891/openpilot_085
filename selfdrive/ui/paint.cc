@@ -100,16 +100,15 @@ static void ui_draw_circle_image(const UIState *s, int center_x, int center_y, i
   }
 }
 
-static void draw_lead(UIState *s, int idx) {
+static void draw_lead(UIState *s, const cereal::RadarState::LeadData::Reader &lead_data, const vertex_data &vd) {
   // Draw lead car indicator
-  const auto &lead = s->scene.lead_data[idx];
-  auto [x, y] = s->scene.lead_vertices[idx];
+  auto [x, y] = vd;
 
   float fillAlpha = 0;
   float speedBuff = 10.;
   float leadBuff = 40.;
-  float d_rel = lead.getDRel();
-  float v_rel = lead.getVRel();
+  float d_rel = lead_data.getDRel();
+  float v_rel = lead_data.getVRel();
   if (d_rel < leadBuff) {
     fillAlpha = 255*(1.0-(d_rel/leadBuff));
     if (v_rel < 0) {
@@ -270,11 +269,14 @@ static void ui_draw_world(UIState *s) {
   // Draw lead indicators if openpilot is handling longitudinal
   //if (s->scene.longitudinal_control) {
   if (true) {
-    if (scene->lead_data[0].getStatus()) {
-      draw_lead(s, 0);
+    auto radar_state = (*s->sm)["radarState"].getRadarState();
+    auto lead_one = radar_state.getLeadOne();
+    auto lead_two = radar_state.getLeadTwo();
+    if (lead_one.getStatus()) {
+      draw_lead(s, lead_one, s->scene.lead_vertices[0]);
     }
-    if (scene->lead_data[1].getStatus() && (std::abs(scene->lead_data[0].getDRel() - scene->lead_data[1].getDRel()) > 3.0)) {
-      draw_lead(s, 1);
+    if (lead_two.getStatus() && (std::abs(lead_one.getDRel() - lead_two.getDRel()) > 3.0)) {
+      draw_lead(s, lead_two, s->scene.lead_vertices[1]);
     }
   }
   nvgResetScissor(s->vg);
@@ -510,7 +512,7 @@ static void ui_draw_vision_maxspeed_org(UIState *s) {
 
 static void ui_draw_vision_maxspeed(UIState *s) {
   const int SET_SPEED_NA = 255;
-  float maxspeed = s->scene.controls_state.getVCruise();
+  float maxspeed = (*s->sm)["controlsState"].getControlsState().getVCruise();
   const bool is_cruise_set = maxspeed != 0 && maxspeed != SET_SPEED_NA && s->scene.controls_state.getEnabled();
   if (is_cruise_set && !s->scene.is_metric) { maxspeed *= 0.6225; }
 
@@ -563,7 +565,7 @@ static void ui_draw_vision_cruise_speed(UIState *s) {
 }
 
 static void ui_draw_vision_speed(UIState *s) {
-  const float speed = std::max(0.0, s->scene.car_state.getVEgo() * (s->scene.is_metric ? 3.6 : 2.2369363));
+  const float speed = std::max(0.0, (*s->sm)["carState"].getCarState().getVEgo() * (s->scene.is_metric ? 3.6 : 2.2369363));
   const std::string speed_str = std::to_string((int)std::nearbyint(speed));
   const Rect &viz_rect = s->viz_rect;
   const UIScene *scene = &s->scene;
@@ -694,7 +696,8 @@ static void ui_draw_vision_face(UIState *s) {
   const int radius = 85;
   const int center_x = s->viz_rect.x + radius + (bdr_s);
   const int center_y = s->viz_rect.bottom() - footer_h + ((footer_h - radius) / 2);
-  ui_draw_circle_image(s, center_x, center_y, radius, "driver_face", s->scene.dmonitoring_state.getIsActiveMode());
+  bool is_active = (*s->sm)["driverMonitoringState"].getDriverMonitoringState().getIsActiveMode();
+  ui_draw_circle_image(s, center_x, center_y, radius, "driver_face", is_active);
 }
 
 static void ui_draw_driver_view(UIState *s) {
@@ -712,9 +715,10 @@ static void ui_draw_driver_view(UIState *s) {
   ui_fill_rect(s->vg, {blackout_x_l, rect.y, blackout_w_l, rect.h}, COLOR_BLACK_ALPHA(144));
   ui_fill_rect(s->vg, {blackout_x_r, rect.y, blackout_w_r, rect.h}, COLOR_BLACK_ALPHA(144));
 
-  const bool face_detected = s->scene.driver_state.getFaceProb() > 0.4;
+  auto driver_state = (*s->sm)["driverState"].getDriverState();
+  const bool face_detected = driver_state.getFaceProb() > 0.4;
   if (face_detected) {
-    auto fxy_list = s->scene.driver_state.getFacePosition();
+    auto fxy_list = driver_state.getFacePosition();
     float face_x = fxy_list[0];
     float face_y = fxy_list[1];
     int fbox_x = valid_rect.centerX() + (is_rhd ? face_x : -face_x) * valid_rect.w;
@@ -1240,7 +1244,7 @@ static void ui_draw_vision(UIState *s) {
     }
     // Set Speed, Current Speed, Status/Events
     ui_draw_vision_header(s);
-    if (s->scene.controls_state.getAlertSize() == cereal::ControlsState::AlertSize::NONE) {
+    if ((*s->sm)["controlsState"].getControlsState().getAlertSize() == cereal::ControlsState::AlertSize::NONE) {
       ui_draw_vision_face(s);
       // if (s->scene.model_long && !s->scene.comma_stock_ui) {
       //   ui_draw_ml_button(s);
@@ -1406,7 +1410,7 @@ static mat4 get_driver_view_transform() {
       0.0,  0.0, 1.0, 0.0,
       0.0,  0.0, 0.0, 1.0,
     }};
-  
+
   } else {
      // frame from 4/3 to 16/9 display
     transform = (mat4){{
@@ -1510,6 +1514,14 @@ void ui_nvg_init(UIState *s) {
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
   }
+
+  ui_resize(s, s->fb_w, s->fb_h);
+}
+
+
+void ui_resize(UIState *s, int width, int height){
+  s->fb_w = width;
+  s->fb_h = height;
 
   auto intrinsic_matrix = s->wide_camera ? ecam_intrinsic_matrix : fcam_intrinsic_matrix;
 

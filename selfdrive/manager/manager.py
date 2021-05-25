@@ -20,7 +20,7 @@ from selfdrive.manager.process_config import managed_processes
 from selfdrive.athena.registration import register
 from selfdrive.swaglog import cloudlog, add_file_handler
 from selfdrive.version import dirty, get_git_commit, version, origin, branch, commit, \
-                              terms_version, training_version, \
+                              terms_version, training_version, comma_remote, \
                               get_git_branch, get_git_remote
 
 def manager_init():
@@ -132,6 +132,7 @@ def manager_init():
   ]
 
   if TICI:
+    default_params.append(("EnableLteOnroad", "0"))
     default_params.append(("IsUploadRawEnabled", "0"))
 
   if params.get_bool("RecordFrontLock"):

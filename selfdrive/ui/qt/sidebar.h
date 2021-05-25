@@ -6,15 +6,24 @@
 
 class Sidebar : public QFrame {
   Q_OBJECT
+  Q_PROPERTY(QString connectStr MEMBER connect_str NOTIFY valueChanged);
+  Q_PROPERTY(QColor connectStatus MEMBER connect_status NOTIFY valueChanged);
+  Q_PROPERTY(QString pandaStr MEMBER panda_str NOTIFY valueChanged);
+  Q_PROPERTY(QColor pandaStatus MEMBER panda_status NOTIFY valueChanged);
+  Q_PROPERTY(int tempVal MEMBER temp_val NOTIFY valueChanged);
+  Q_PROPERTY(QColor tempStatus MEMBER temp_status NOTIFY valueChanged);
+  Q_PROPERTY(QString netType MEMBER net_type NOTIFY valueChanged);
+  Q_PROPERTY(QImage netStrength MEMBER net_strength NOTIFY valueChanged);
 
 public:
   explicit Sidebar(QWidget* parent = 0);
 
 signals:
   void openSettings();
+  void valueChanged();
 
 public slots:
-  void update(const UIState &s);
+  void updateState(const UIState &s);
 
 protected:
   void paintEvent(QPaintEvent *event) override;
@@ -29,7 +38,7 @@ private:
     {cereal::DeviceState::NetworkType::WIFI, "WiFi"},
     {cereal::DeviceState::NetworkType::CELL2_G, "2G"},
     {cereal::DeviceState::NetworkType::CELL3_G, "3G"},
-    {cereal::DeviceState::NetworkType::CELL4_G, "4G"},
+    {cereal::DeviceState::NetworkType::CELL4_G, "LTE"},
     {cereal::DeviceState::NetworkType::CELL5_G, "5G"}
   };
   const QMap<cereal::DeviceState::NetworkStrength, QImage> signal_imgs = {
@@ -54,9 +63,8 @@ private:
   QColor panda_status = warning_color;
   int temp_val = 0;
   QColor temp_status = warning_color;
-  cereal::DeviceState::NetworkType net_type;
-  cereal::DeviceState::NetworkStrength strength;
-
+  QString net_type;
+  QImage net_strength;
 
   // atom
   const QMap<int, QImage> battery_imgs = {

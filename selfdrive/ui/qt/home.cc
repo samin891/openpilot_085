@@ -23,7 +23,7 @@ HomeWindow::HomeWindow(QWidget* parent) : QWidget(parent) {
 
   sidebar = new Sidebar(this);
   layout->addWidget(sidebar);
-  QObject::connect(this, &HomeWindow::update, sidebar, &Sidebar::update);
+  QObject::connect(this, &HomeWindow::update, sidebar, &Sidebar::updateState);
   QObject::connect(sidebar, &Sidebar::openSettings, this, &HomeWindow::openSettings);
 
   slayout = new QStackedLayout();
@@ -139,7 +139,16 @@ void HomeWindow::mousePressEvent(QMouseEvent* e) {
   }
   // Handle sidebar collapsing
   if (onroad->isVisible() && (!sidebar->isVisible() || e->x() > sidebar->width())) {
-    sidebar->setVisible(!sidebar->isVisible());
+    // Hide map first if visible, then hide sidebar
+    if (onroad->map != nullptr && onroad->map->isVisible()){
+      onroad->map->setVisible(false);
+    } else if (!sidebar->isVisible()) {
+      sidebar->setVisible(true);
+    } else {
+      sidebar->setVisible(false);
+
+      if (onroad->map != nullptr) onroad->map->setVisible(true);
+    }
     QUIState::ui_state.sidebar_view = !QUIState::ui_state.sidebar_view;
   }
 

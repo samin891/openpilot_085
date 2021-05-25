@@ -17,7 +17,7 @@ from typing import Any
 
 import requests
 from jsonrpc import JSONRPCResponseManager, dispatcher
-from websocket import ABNF, WebSocketTimeoutException, create_connection
+from websocket import ABNF, WebSocketTimeoutException, WebSocketException, create_connection
 
 import cereal.messaging as messaging
 from cereal.services import service_list
@@ -29,6 +29,8 @@ from selfdrive.hardware import HARDWARE, PC
 from selfdrive.loggerd.config import ROOT
 from selfdrive.loggerd.xattr_cache import getxattr, setxattr
 from selfdrive.swaglog import cloudlog, SWAGLOG_DIR
+import selfdrive.crash as crash
+from selfdrive.version import dirty, origin, branch, commit
 
 ATHENA_HOST = os.getenv('ATHENA_HOST', 'wss://athena.comma.ai')
 HANDLER_THREADS = int(os.getenv('HANDLER_THREADS', "4"))
@@ -36,6 +38,7 @@ LOCAL_PORT_WHITELIST = set([8022])
 
 LOG_ATTR_NAME = 'user.upload'
 LOG_ATTR_VALUE_MAX_UNIX_TIME = int.to_bytes(2147483647, 4, sys.byteorder)
+RECONNECT_TIMEOUT_S = 70
 
 dispatcher["echo"] = lambda s: s
 recv_queue: Any = queue.Queue()
@@ -127,6 +130,17 @@ def getMessage(service=None, timeout=1000):
     raise TimeoutError
 
   return ret.to_dict()
+
+
+@dispatcher.add_method
+def setNavDestination(latitude=0, longitude=0):
+  destination = {
+    "latitude": latitude,
+    "longitude": longitude,
+  }
+  Params().put("NavDestination", json.dumps(destination))
+
+  return {"success": 1}
 
 
 @dispatcher.add_method

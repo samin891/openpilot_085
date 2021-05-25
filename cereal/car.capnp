@@ -103,6 +103,10 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     processNotRunning @95;
     dashcamMode @96;
     controlsInitializing @98;
+    usbError @99;
+    roadCameraError @100;
+    driverCameraError @101;
+    wideRoadCameraError @102;
 
     radarCanErrorDEPRECATED @15;
     radarCommIssueDEPRECATED @67;
@@ -123,18 +127,18 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     neosUpdateRequiredDEPRECATED @88;
     modelLagWarningDEPRECATED @93;
     startupOneplusDEPRECATED @82;
-    laneChangeManual @99;
-    emgButtonManual @100;
-    driverSteering @101;
-    modeChangeOpenpilot @102;
-    modeChangeDistcurv @103;
-    modeChangeDistance @104;
-    modeChangeOneway @105;
-    modeChangeMaponly @106;
-    needBrake @107;
-    standStill @108;
-    modelLongAlert @109;
-	isgActive @110;
+    laneChangeManual @103;
+    emgButtonManual @104;
+    driverSteering @105;
+    modeChangeOpenpilot @106;
+    modeChangeDistcurv @107;
+    modeChangeDistance @108;
+    modeChangeOneway @109;
+    modeChangeMaponly @110;
+    needBrake @111;
+    standStill @112;
+    modelLongAlert @113;
+	isgActive @114;
   }
 }
 
@@ -159,7 +163,6 @@ struct CarState {
   # brake pedal, 0.0-1.0
   brake @5 :Float32;      # this is user pedal only
   brakePressed @6 :Bool;  # this is user pedal only
-  brakeLights @19 :Bool;
 
   # steering wheel
   steeringAngleDeg @7 :Float32;
@@ -201,6 +204,7 @@ struct CarState {
   leftBlindspot @33 :Bool; # Is there something blocking the left lane change
   rightBlindspot @34 :Bool; # Is there something blocking the right lane change
 
+  brakeLights @19 :Bool;
   # tpms 
   tpmsPressureFl @37 :Float32;
   tpmsPressureFr @38 :Float32;

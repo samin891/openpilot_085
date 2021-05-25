@@ -1,8 +1,6 @@
 #include "settings.h"
 
 #include <cassert>
-#include <iostream>
-#include <sstream>
 #include <string>
 #include <QProcess>
 
@@ -51,13 +49,13 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
                                   "../assets/offroad/icon_shell.png",
                                   this));
 
-#ifdef QCOM2
+  if (!Hardware::TICI()) {
   toggles.append(new ParamControl("IsUploadRawEnabled",
                                  "Upload Raw Logs",
                                  "Upload full logs and full resolution video by default while on WiFi. If not enabled, individual logs can be marked for upload at my.comma.ai/useradmin.",
                                  "../assets/offroad/icon_network.png",
                                  this));
-#endif
+  }
 
   ParamControl *record_toggle = new ParamControl("RecordFront",
                                                  "운전자 영상 녹화 및 업로드",
@@ -71,19 +69,23 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
                                    "../assets/offroad/icon_road.png",
                                    this));
 
-#ifdef QCOM2
-  toggles.append(new ParamControl("EnableWideCamera",
-                                  "Enable use of Wide Angle Camera",
-                                  "Use wide angle camera for driving and ui. Only takes effect after reboot.",
-                                  "../assets/offroad/icon_openpilot.png",
-                                  this));
-  toggles.append(new ParamControl("EnableLteOnroad",
-                                  "Enable LTE while onroad",
-                                  "",
-                                  "../assets/offroad/icon_network.png",
-                                  this));
+  if (Hardware::TICI()) {
+    toggles.append(new ParamControl("EnableWideCamera",
+                                    "Enable use of Wide Angle Camera",
+                                    "Use wide angle camera for driving and ui.",
+                                    "../assets/offroad/icon_openpilot.png",
+                                    this));
+    QObject::connect(toggles.back(), &ToggleControl::toggleFlipped, [=](bool state) {
+      Params().remove("CalibrationParams");
+    });
 
-#endif
+    toggles.append(new ParamControl("EnableLteOnroad",
+                                    "Enable LTE while onroad",
+                                    "",
+                                    "../assets/offroad/icon_network.png",
+                                    this));
+  }
+
   toggles.append(new ParamControl("OpkrEnableDriverMonitoring",
                                   "운전자 모니터링 사용",
                                   "운전자 감시 모니터링을 사용합니다.",
@@ -194,7 +196,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
 
   offroad_btns.append(new ButtonControl("트레이닝가이드 보기", "다시보기",
                                         "오픈파일럿에 대한 규칙, 기능, 제한내용 등을 확인하세요.", [=]() {
-    if (ConfirmationDialog::confirm("트레이닝 가이드를 다시 확인하시겠습니까?")) {
+    if (ConfirmationDialog::confirm("트레이닝 가이드를 다시 확인하시겠습니까?", this)) {
       Params().remove("CompletedTrainingVersion");
       emit reviewTrainingGuide();
     }
@@ -202,7 +204,7 @@ DevicePanel::DevicePanel(QWidget* parent) : QWidget(parent) {
 
   QString brand = params.getBool("Passive") ? "대시캠" : "오픈파일럿";
   offroad_btns.append(new ButtonControl(brand + " 제거", "제거", "", [=]() {
-    if (ConfirmationDialog::confirm("제거하시겠습니까?")) {
+    if (ConfirmationDialog::confirm("제거하시겠습니까?", this)) {
       Params().putBool("DoUninstall", true);
     }
   }, "", this));

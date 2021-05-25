@@ -79,6 +79,7 @@ public:
 protected:
   void paintGL() override;
   void initializeGL() override;
+  void resizeGL(int w, int h) override;
 
 private:
   double prev_draw_t = 0;
@@ -93,6 +94,7 @@ class OnroadWindow : public QWidget {
 
 public:
   OnroadWindow(QWidget* parent = 0);
+  QWidget *map = nullptr;
 
 private:
   OnroadAlerts *alerts;
