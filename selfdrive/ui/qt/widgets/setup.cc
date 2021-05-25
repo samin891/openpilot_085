@@ -230,12 +230,12 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
   setSizePolicy(sp_retain);
 
   // set up API requests
-  QString dongleId = QString::fromStdString(Params().get("DongleId"));
-  QString url = "https://api.commadotai.com/v1.1/devices/" + dongleId + "/";
-  RequestRepeater* repeater = new RequestRepeater(this, url, "ApiCache_Device", 5);
+  // QString dongleId = QString::fromStdString(Params().get("DongleId"));
+  // QString url = "https://api.commadotai.com/v1.1/devices/" + dongleId + "/";
+  // RequestRepeater* repeater = new RequestRepeater(this, url, "ApiCache_Device", 5);
 
-  QObject::connect(repeater, &RequestRepeater::receivedResponse, this, &SetupWidget::replyFinished);
-  QObject::connect(repeater, &RequestRepeater::failedResponse, this, &SetupWidget::parseError);
+  // QObject::connect(repeater, &RequestRepeater::receivedResponse, this, &SetupWidget::replyFinished);
+  // QObject::connect(repeater, &RequestRepeater::failedResponse, this, &SetupWidget::parseError);
   hide(); // Only show when first request comes back
 }
 
