@@ -443,7 +443,7 @@ def main():
     except Exception:
       cloudlog.exception("athenad.main.exception")
       conn_retries += 1
-      params.delete("LastAthenaPingTime")
+      #params.delete("LastAthenaPingTime")
 
     time.sleep(backoff(conn_retries))
 
