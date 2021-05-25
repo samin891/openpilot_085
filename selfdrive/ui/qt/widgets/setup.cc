@@ -157,7 +157,7 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
   QVBoxLayout* finishRegistationLayout = new QVBoxLayout;
   finishRegistationLayout->setMargin(30);
 
-  QLabel* registrationDescription = new QLabel("QR코드 스캐너를 이용하여 장치를 페어링 하세요");
+  QLabel* registrationDescription = new QLabel("QR코드 스캐너를 이용하여\n장치를 페어링 하세요");
   //QLabel* registrationDescription = new QLabel("COMMA CONNECT 앱을 이용하여 장치를 페어링 하세요");
   registrationDescription->setWordWrap(true);
   registrationDescription->setAlignment(Qt::AlignCenter);
