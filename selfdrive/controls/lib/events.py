@@ -783,7 +783,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   },
 
   EventName.roadCameraError: {
-    ET.PERMANENT: NormalPermanentAlert("주행 카메라 오류, "",
+    ET.PERMANENT: NormalPermanentAlert("주행 카메라 오류", "",
                                        duration_text=10.),
   },
 
