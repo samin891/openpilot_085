@@ -206,6 +206,17 @@ SetupWidget::SetupWidget(QWidget* parent) : QFrame(parent) {
 
   qrLayout->addWidget(new PairingQRWidget, 1);
 
+  QPushButton* backButton = new QPushButton("뒤로가기");
+  backButton->setFixedHeight(100);
+  backButton->setStyleSheet(R"(
+    border-radius: 30px;
+    font-size: 45px;
+    font-weight: 500;
+    background: #585858;
+  )");
+  qrLayout->addWidget(backButton);
+  QObject::connect(backButton, &QPushButton::released, this, &SetupWidget::parseError);
+
   QWidget* q = new QWidget;
   q->setLayout(qrLayout);
   mainLayout->addWidget(q);
