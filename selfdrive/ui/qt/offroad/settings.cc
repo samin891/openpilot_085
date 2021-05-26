@@ -93,12 +93,12 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
                                   this));
   toggles.append(new ParamControl("OpkrEnableLogger",
                                   "주행로그 기록 사용",
-                                  "데이터 분석을 위해 주행로그를 기록합니다.",
+                                  "로컬에서 데이터 분석을 위해 주행로그를 기록합니다. 로거만 활성화 되며 서버로 업로드 되지 않습니다.",
                                   "../assets/offroad/icon_shell.png",
                                   this));
   toggles.append(new ParamControl("OpkrEnableUploader",
                                   "주행로그 서버 전송(사용주의-설명참조)",
-                                  "시스템로그 및 기타 주행데이터를 콤마서버로 전송하기 위해 업로드 프로세스를 활성화 합니다. 판다 세이프티 코드 및 모니터링 수치를 수정한 경우는 활성화하지 마십시오. 기기가 콤마 네트워크로부터 차단되며 standalone상태로만 동작됩니다.",
+                                  "시스템로그 및 기타 주행데이터를 서버로 전송하기 위해 업로드 프로세스를 활성화 합니다. 오프로드 상태에서만 업로드 합니다.",
                                   "../assets/offroad/icon_shell.png",
                                   this));
   toggles.append(new ParamControl("MadModeEnabled",
@@ -521,20 +521,12 @@ QWidget * user_panel(QWidget * parent) {
   layout->addWidget(new MaxRateUp());
   layout->addWidget(new MaxRateDown());
   const char* p_edit_go = "/data/openpilot/p_edit.sh ''";
-  layout->addWidget(new ButtonControl("판다 값 최적화", "실행", "판다 값을 적정값으로 최적화 합니다.",
+  layout->addWidget(new ButtonControl("판다값 변경 적용", "실행", "판다 값을 변경합니다. 기본값: MAX_STEER = 384, RT_DELTA = 112, MAX_RATE_UP = 3, MAX_RATE_DOWN = 7",
                                       [=]() { 
-                                        if (ConfirmationDialog::confirm("판다 값을 최적화 합니다. 조지 싸장님 쌀랑해요~")){
+                                        if (ConfirmationDialog::confirm("변경된 판다값을 적용합니다. 진행하시겠습니까?")){
                                           std::system(p_edit_go);
                                         }
                                       }));
-  const char* m_edit_go = "/data/openpilot/m_edit.sh ''";
-  layout->addWidget(new ButtonControl("모니터링 최적화", "실행", "야간 감시 및 터널 안 원활한 모니터링을 위하여 파라미터를 수정합니다.",
-                                      [=]() { 
-                                        if (ConfirmationDialog::confirm("야간감시 및 터널 모니터링을 최적화 합니다. 싸장님 좋아요. 콤마 쌀랑해요~")){
-                                          std::system(m_edit_go);
-                                        }
-                                      }));
-  //layout->addWidget(horizontal_line());
 
   layout->addStretch(1);
 
