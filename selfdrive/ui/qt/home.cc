@@ -31,6 +31,7 @@ HomeWindow::HomeWindow(QWidget* parent) : QWidget(parent) {
 
   onroad = new OnroadWindow(this);
   slayout->addWidget(onroad);
+
   QObject::connect(this, &HomeWindow::update, onroad, &OnroadWindow::update);
   QObject::connect(this, &HomeWindow::offroadTransitionSignal, onroad, &OnroadWindow::offroadTransition);
 
@@ -58,6 +59,7 @@ void HomeWindow::mousePressEvent(QMouseEvent* e) {
     QUIState::ui_state.scene.driver_view = false;
     return;
   }
+
   // OPKR add map
   if (QUIState::ui_state.scene.started && map_overlay_btn.ptInRect(e->x(), e->y())) {
     QSoundEffect effect1;

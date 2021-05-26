@@ -98,7 +98,6 @@ class Controls:
     sounds_available = HARDWARE.get_sound_card_online()
 
     car_recognized = self.CP.carName != 'mock'
-    fuzzy_fingerprint = self.CP.fuzzyFingerprint
 
     # If stock camera is disconnected, we loaded car controls and it's not dashcam mode
     controller_available = self.CP.enableCamera and self.CI.CC is not None and not passive and not self.CP.dashcamOnly
