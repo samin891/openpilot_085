@@ -97,7 +97,7 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
                                   "../assets/offroad/icon_shell.png",
                                   this));
   toggles.append(new ParamControl("OpkrEnableUploader",
-                                  "주행로그 서버 전송(사용주의-설명참조)",
+                                  "주행로그 서버 전송",
                                   "시스템로그 및 기타 주행데이터를 서버로 전송하기 위해 업로드 프로세스를 활성화 합니다. 오프로드 상태에서만 업로드 합니다.",
                                   "../assets/offroad/icon_shell.png",
                                   this));
