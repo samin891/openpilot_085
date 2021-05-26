@@ -8,7 +8,6 @@ from common.stat_live import RunningStatFilter
 
 from common.params import Params
 
-EnableLogger = Params().get_bool("OpkrEnableLogger")
 EnableDriverMonitoring = Params().get_bool("OpkrEnableDriverMonitoring")
 MonitorEyesThreshold = int(Params().get("OpkrMonitorEyesThreshold")) * 0.01
 NormalEyesThreshold = int(Params().get("OpkrMonitorNormalEyesThreshold")) * 0.01
@@ -21,23 +20,14 @@ EventName = car.CarEvent.EventName
 #  We recommend that you do not change these numbers from the defaults.
 # ******************************************************************************************
 
-if not EnableLogger:
-  _AWARENESS_TIME = 3600.
-else:
-  _AWARENESS_TIME = 35.  # passive wheel touch total timeout
+_AWARENESS_TIME = 35.  # passive wheel touch total timeout
 _AWARENESS_PRE_TIME_TILL_TERMINAL = 12.
 _AWARENESS_PROMPT_TIME_TILL_TERMINAL = 6.
-if not EnableDriverMonitoring and not EnableLogger:
-  _DISTRACTED_TIME = 3600.
-else:
-  _DISTRACTED_TIME = 11.
+_DISTRACTED_TIME = 11. if EnableDriverMonitoring else 3600.
 _DISTRACTED_PRE_TIME_TILL_TERMINAL = 8.
 _DISTRACTED_PROMPT_TIME_TILL_TERMINAL = 6.
 
-if not EnableLogger:
-  _FACE_THRESHOLD = 0.99
-else:
-  _FACE_THRESHOLD = 0.6
+_FACE_THRESHOLD = 0.99
 _PARTIAL_FACE_THRESHOLD = 0.6
 _EYE_THRESHOLD = 0.5
 _SG_THRESHOLD = 0.5
