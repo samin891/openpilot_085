@@ -520,105 +520,21 @@ QWidget * user_panel(QWidget * parent) {
   layout->addWidget(new MaxRTDelta());
   layout->addWidget(new MaxRateUp());
   layout->addWidget(new MaxRateDown());
-  
-  QLabel btn_label_pnd;
-  QPushButton btn_org_pnd;
-  QPushButton btn_mod_pnd;
-  btn_label_pnd.setText(QString::fromStdString("판다 설정 값 적용"));
-  btn_org_pnd.setStyleSheet(R"(
-    padding: 0;
-    border-radius: 50px;
-    font-size: 35px;
-    font-weight: 500;
-    color: #E4E4E4;
-    background-color: #393939;
-  )");
-  btn_mod_pnd.setStyleSheet(R"(
-    padding: 0;
-    border-radius: 50px;
-    font-size: 35px;
-    font-weight: 500;
-    color: #E4E4E4;
-    background-color: #393939;
-  )");
-  btn_org_pnd.setFixedSize(200, 100);
-  btn_mod_pnd.setFixedSize(200, 100);
-  btn_org_pnd.setText("원래대로");
-  btn_mod_pnd.setText("변경적용");
-  hlayout->addWidget(&btn_label_pnd);
-  hlayout->addWidget(&btn_org_pnd);
-  hlayout->addWidget(&btn_mod_pnd);
-  const char* restore_stock_pnd = "cp -f /data/openpilot/selfdrive/assets/addon/files/pnd/org/safety_hyundai.h /data/openpilot/panda/board/safety/";
-  const char* mon_optimization_pnd = "/data/openpilot/p_edit.sh";
-  QObject::connect(btn_org_pnd, &QPushButton::released, [=]() {
-    if (ConfirmationDialog::confirm("판다값을 콤마 순정값으로 복원합니다. 진행하시겠습니까? 자동 재부팅 됩니다.", this)) {
-      Params().put("MaxSteer", "384");
-      Params().put("MaxRTDelta", "112");
-      Params().put("MaxRateUp", "3");
-      Params().put("MaxRateDown", "7");
-      std::system(restore_stock_pnd);
-      Hardware::reboot();
-    }
-  });
-  QObject::connect(btn_mod_pnd, &QPushButton::released, [=]() {
-    if (ConfirmationDialog::confirm("변경된 판다값을 적용합니다. 진행하시겠습니까? 자동 재부팅 됩니다.", this)) {
-      std::system(mon_optimization_pnd);
-    }
-  });
-  // const char* p_edit_go = "/data/openpilot/p_edit.sh ''";
-  // layout->addWidget(new ButtonControl("판다 설정 값 적용", "실행", "판다 세이프티 수치를 조정합니다. 기본값: MAX_STEER = 384, RT_DELTA = 112, MAX_RATE_UP = 3, MAX_RATE_DOWN = 7",
-  //                                     [=]() { 
-  //                                       if (ConfirmationDialog::confirm("변경된 판다 세이프티값을 적용합니다. 꼭 필요한 경우에만 변경하세요. 진행하시겠습니까?")){
-  //                                         std::system(p_edit_go);
-  //                                       }
-  //                                     }));
-  QLabel btn_label;
-  QPushButton btn_org;
-  QPushButton btn_mod;
-  btn_label.setText(QString::fromStdString("모니터링 최적화"));
-  btn_org.setStyleSheet(R"(
-    padding: 0;
-    border-radius: 50px;
-    font-size: 35px;
-    font-weight: 500;
-    color: #E4E4E4;
-    background-color: #393939;
-  )");
-  btn_mod.setStyleSheet(R"(
-    padding: 0;
-    border-radius: 50px;
-    font-size: 35px;
-    font-weight: 500;
-    color: #E4E4E4;
-    background-color: #393939;
-  )");
-  btn_org.setFixedSize(200, 100);
-  btn_mod.setFixedSize(200, 100);
-  btn_org.setText("순정값");
-  btn_mod.setText("최적화");
-  hlayout->addWidget(&btn_label);
-  hlayout->addWidget(&btn_org);
-  hlayout->addWidget(&btn_mod);
-  const char* restore_stock = "cp -f /data/openpilot/selfdrive/assets/addon/files/mon/org/d*.py /data/openpilot/selfdrive/monitoring/";
-  const char* mon_optimization = "cp -f /data/openpilot/selfdrive/assets/addon/files/mon/mod/d*.py /data/openpilot/selfdrive/monitoring/";
-  QObject::connect(btn_org, &QPushButton::released, [=]() {
-    if (ConfirmationDialog::confirm("모니터링 설정을 콤마 순정 값으로 복원합니다. 진행하시겠습니까?", this)) {
-      std::system(restore_stock);
-    }
-  });
-  QObject::connect(btn_mod, &QPushButton::released, [=]() {
-    if (ConfirmationDialog::confirm("모니터링 설정을 국내 정서에 맞게 최적화 합니다. 진행하시겠습니까?", this)) {
-      std::system(mon_optimization);
-    }
-  });
-  // const char* m_edit_go = "/data/openpilot/m_edit.sh ''";
-  // layout->addWidget(new ButtonControl("모니터링 최적화", "실행", "야간 감시 및 터널 안 원활한 모니터링을 위하여 파라미터를 수정합니다.",
-  //                                     [=]() { 
-  //                                       if (ConfirmationDialog::confirm("야간감시 및 터널 모니터링을 최적화 합니다. 싸장님 좋아요. 콤마 쌀랑해요~")){
-  //                                         std::system(m_edit_go);
-  //                                       }
-  //                                     }));
-  layout->addWidget(horizontal_line());
+  const char* p_edit_go = "/data/openpilot/p_edit.sh ''";
+  layout->addWidget(new ButtonControl("판다 값 최적화", "실행", "판다 값을 적정값으로 최적화 합니다.",
+                                      [=]() { 
+                                        if (ConfirmationDialog::confirm("판다 값을 최적화 합니다. 조지 싸장님 쌀랑해요~")){
+                                          std::system(p_edit_go);
+                                        }
+                                      }));
+  const char* m_edit_go = "/data/openpilot/m_edit.sh ''";
+  layout->addWidget(new ButtonControl("모니터링 최적화", "실행", "야간 감시 및 터널 안 원활한 모니터링을 위하여 파라미터를 수정합니다.",
+                                      [=]() { 
+                                        if (ConfirmationDialog::confirm("야간감시 및 터널 모니터링을 최적화 합니다. 싸장님 좋아요. 콤마 쌀랑해요~")){
+                                          std::system(m_edit_go);
+                                        }
+                                      }));
+  //layout->addWidget(horizontal_line());
 
   layout->addStretch(1);
 
