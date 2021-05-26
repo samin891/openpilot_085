@@ -80,6 +80,7 @@ static void update_leads(UIState *s, const cereal::RadarState::Reader &radar_sta
       // negative because radarState uses left positive convention
       calib_frame_to_full_frame(s, lead_data.getDRel(), -lead_data.getYRel(), z + 1.22, &s->scene.lead_vertices[i]);
     }
+    s->scene.lead_data[i] = lead_data;
   }
 }
 

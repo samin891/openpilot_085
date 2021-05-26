@@ -232,7 +232,7 @@ class LateralPlanner():
       self.libmpc.set_weights(path_cost, heading_cost, CP.steerRateCost)
       self.laneless_mode_status = True
       self.laneless_mode_at_stopping = True
-      self.laneless_mode_at_stopping_timer = 80
+      self.laneless_mode_at_stopping_timer = 60
     elif self.laneless_mode_at_stopping and (v_ego < 0.5 or self.laneless_mode_at_stopping_timer <= 0):
       d_path_xyz = self.LP.get_d_path(v_ego, self.t_idxs, self.path_xyz)
       self.libmpc.set_weights(MPC_COST_LAT.PATH, MPC_COST_LAT.HEADING, CP.steerRateCost)
