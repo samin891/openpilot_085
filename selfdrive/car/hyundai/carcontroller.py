@@ -552,7 +552,7 @@ class CarController():
             stock_weight = interp(CS.out.radarDistance, [3., 25.], [1., 0.])
             if lead_objspd < 0:
               vRel_weight = interp(abs(lead_objspd), [0, 20], [1, 2])
-              stock_weight = interp(CS.out.radarDistance, [3. * vRel_weight, 25. * vRel_weight], [1., 0.])
+              stock_weight = interp(CS.out.radarDistance, [3. ** vRel_weight, 25. * vRel_weight], [1., 0.])
           else:
             stock_weight = 0.
           apply_accel = apply_accel * (1. - stock_weight) + aReqValue * stock_weight
