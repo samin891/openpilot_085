@@ -523,7 +523,7 @@ QWidget * user_panel(QWidget * parent) {
   const char* p_edit_go = "/data/openpilot/p_edit.sh ''";
   layout->addWidget(new ButtonControl("판다값 변경 적용", "실행", "판다 값을 변경합니다. 기본값: MAX_STEER = 384, RT_DELTA = 112, MAX_RATE_UP = 3, MAX_RATE_DOWN = 7",
                                       [=]() { 
-                                        if (ConfirmationDialog::confirm("변경된 판다값을 적용합니다. 진행하시겠습니까?")){
+                                        if (ConfirmationDialog::confirm("변경된 판다값을 적용합니다. 진행하시겠습니까? 자동 재부팅됩니다.")){
                                           std::system(p_edit_go);
                                         }
                                       }));
