@@ -547,7 +547,7 @@ class CarController():
         aReqValue = CS.scc12["aReqValue"]
         if 0 < CS.out.radarDistance <= 149:
           if aReqValue > 0.:
-            stock_weight = interp(CS.out.radarDistance, [3., 25.], [0.85, 0.])
+            stock_weight = interp(CS.out.radarDistance, [3., 25.], [0.7, 0.])
           elif aReqValue < 0.:
             stock_weight = interp(CS.out.radarDistance, [3., 25.], [1., 0.])
             if lead_objspd < 0:
