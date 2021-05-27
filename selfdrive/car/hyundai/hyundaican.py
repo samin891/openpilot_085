@@ -176,6 +176,13 @@ def create_scc14(packer, enabled, scc14, aebcmdact, lead_visible, lead_dist, v_e
     values["ComfortBandLower"] = 0
     values["ACCMode"] = 1 if enabled else 4 # stock will always be 4 instead of 0 after first disengage
     values["ObjGap"] = int(min(lead_dist+2, 10)/2) if lead_visible else 0 # 1-5 based on distance to lead vehicle
+  elif enabled and car_fingerprint == CAR.NIRO_HEV and v_ego*3.6 <= 11:
+    values["JerkUpperLimit"] = 12.7
+    values["JerkLowerLimit"] = 12.7
+    values["ComfortBandUpper"] = 0
+    values["ComfortBandLower"] = 0
+    values["ACCMode"] = 1 if enabled else 4 # stock will always be 4 instead of 0 after first disengage
+    values["ObjGap"] = int(min(lead_dist+2, 10)/2) if lead_visible else 0 # 1-5 based on distance to lead vehicle
 
   return packer.make_can_msg("SCC14", 0, values)
 
