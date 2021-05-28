@@ -602,7 +602,7 @@ class CarState(CarStateBase):
     checks = [
       ("LKAS11", 100)
     ]
-    if CP.sccBus == 2:
+    if CP.sccBus == 2 or CP.radarOffCan:
       signals += [
         ("MainMode_ACC", "SCC11", 0),
         ("SCCInfoDisplay", "SCC11", 0),
@@ -628,6 +628,7 @@ class CarState(CarStateBase):
         ("CF_VSM_Stat", "SCC12", 0),
         ("CF_VSM_BeltCmd", "SCC12", 0),
         ("ACCFailInfo", "SCC12", 0),
+        ("ACCMode", "SCC12", 0),
         ("StopReq", "SCC12", 0),
         ("CR_VSM_DecCmd", "SCC12", 0),
         ("aReqRaw", "SCC12", 0),
@@ -645,6 +646,7 @@ class CarState(CarStateBase):
         ("SCCDrvModeRValue", "SCC13", 2),
         ("SCC_Equip", "SCC13", 1),
         ("AebDrvSetStatus", "SCC13", 0),
+        ("Lead_Veh_Dep_Alert_USM", "SCC13", 0),
 
         ("JerkUpperLimit", "SCC14", 0),
         ("JerkLowerLimit", "SCC14", 0),
