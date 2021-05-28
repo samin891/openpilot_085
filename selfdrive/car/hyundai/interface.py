@@ -357,7 +357,7 @@ class CarInterface(CarInterfaceBase):
       # do disable on button down
       if b.type == ButtonType.cancel and b.pressed:
         events.add(EventName.buttonCancel)
-      if self.CC.longcontrol and not self.CC.scc_live:
+      if self.CC.longcontrol and not self.CC.radar_enabled:
         # do enable on both accel and decel buttons
         if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and not b.pressed:
           events.add(EventName.buttonEnable)
