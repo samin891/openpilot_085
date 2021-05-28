@@ -110,6 +110,7 @@ def create_scc11(packer, enabled, frame, set_speed, lead_visible, radar_enabled,
     else:
       values["SCCInfoDisplay"] = 0
     values["DriverAlertDisplay"] = 0
+    values["TauGapSet"] = gapsetting
     values["MainMode_ACC"] = sendaccmode
     values["VSetDis"] = set_speed
     values["ObjValid"] = lead_visible

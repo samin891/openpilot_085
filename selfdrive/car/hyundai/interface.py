@@ -22,7 +22,7 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def compute_gb(accel, speed):
-    return float(accel) / 3.0
+    return float(accel) / 3.5
 
   @staticmethod
   def get_params(candidate, fingerprint=gen_empty_fingerprint(), car_fw=[]):  # pylint: disable=dangerous-default-value
@@ -231,7 +231,7 @@ class CarInterface(CarInterfaceBase):
     ret.enableBsm = 0x58b in fingerprint[0]
 
     ret.stoppingControl = True
-    ret.startAccel = 1.1
+    ret.startAccel = 0.8
 
     ret.standStill = False
     ret.vCruisekph = 0
@@ -260,6 +260,8 @@ class CarInterface(CarInterfaceBase):
     ret.radarDisablePossible = Params().get_bool('OpenpilotLongControlVisionOnly')
     if ret.radarDisablePossible:
       ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunityVisionOnly
+      ret.sccBus == -1
+      ret.enableCruise = False
       ret.radarOffCan = True
       if ret.fcaBus == 0:
         ret.fcaBus = -1
@@ -359,7 +361,7 @@ class CarInterface(CarInterfaceBase):
         events.add(EventName.buttonCancel)
       if self.CC.longcontrol and not self.CC.radar_enabled:
         # do enable on both accel and decel buttons
-        if b.type in [ButtonType.accelCruise, ButtonType.decelCruise] and not b.pressed:
+        if b.type in [ButtonType.accelCruise, ButtonType.decelCruise, ButtonType.altButton3] and not b.pressed:
           events.add(EventName.buttonEnable)
         if EventName.wrongCarMode in events.events:
           events.events.remove(EventName.wrongCarMode)

@@ -297,7 +297,7 @@ class CarState(CarStateBase):
     if not self.lkas_error:
       self.lkas_button_on = cp_cam.vl["LKAS11"]["CF_Lkas_LdwsSysState"]
     
-    ret.cruiseAccStatus = cp_scc.vl["SCC12"]['ACCMode'] == 1
+    ret.cruiseAccStatus = (cp_scc.vl["SCC12"]['ACCMode'] == 1) if not self.no_radar else (not self.brake_check and not self.cancel_check)
     ret.driverAcc = self.driverOverride == 1
 
     return ret
