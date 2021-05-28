@@ -111,6 +111,11 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
                                   "주행화면을 콤마의 순정 UI를 사용합니다. 주행화면 좌측상단의 박스를 눌러도 실시간 전환 가능합니다.",
                                   "../assets/offroad/icon_shell.png",
                                   this));
+  toggles.append(new ParamControl("OpenpilotLongControlVisionOnly",
+                                  "Vision Only 롱컨트롤 사용(★주의요망★-설명참조)",
+                                  "레이더를 사용하지 않고 콤마 비전기반의 롱컨트롤을 사용합니다. 그에 대한 차이를 이해한 경우에만 사용바랍니다. 재부팅 후 적용됩니다.",
+                                  "../assets/offroad/icon_shell.png",
+                                  this));
 
   bool record_lock = Params().getBool("RecordFrontLock");
   record_toggle->setEnabled(!record_lock);

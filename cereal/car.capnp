@@ -481,6 +481,7 @@ struct CarParams {
   emsAvailable @65: Bool;
   standStill @66: Bool;
   vCruisekph @67: Float32;
+  radarDisablePossible @68: Bool;
 
   struct LateralParams {
     torqueBP @0 :List(Int32);
@@ -565,6 +566,7 @@ struct CarParams {
     subaruLegacy @22;  # pre-Global platform
     hyundaiLegacy @23;
     hyundaiCommunity @24;
+    hyundaiCommunityVisionOnly @25;
   }
 
   enum SteerControlType {

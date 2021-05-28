@@ -390,7 +390,7 @@ class Controls:
     # self.CP.enableCruise is true
     self.CP.enableCruise = self.CI.CP.enableCruise
     if not self.CP.enableCruise:
-      self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.buttonEvents, self.enabled)
+      self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.vEgo, CS.gasPressed, CS.buttonEvents, self.enabled, self.is_metric)
       if int(CS.vSetDis)-1 > self.v_cruise_kph:
         self.v_cruise_kph = int(CS.vSetDis)
     elif self.CP.enableCruise and CS.cruiseState.enabled:

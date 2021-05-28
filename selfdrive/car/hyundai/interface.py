@@ -249,14 +249,20 @@ class CarInterface(CarInterfaceBase):
     ret.emsAvailable = True if 608 and 809 in fingerprint[0] else False
 
     ret.radarOffCan = ret.sccBus == -1
-    ret.openpilotLongitudinalControl = ret.sccBus == 2
+    ret.openpilotLongitudinalControl = ret.sccBus != 0
     
-    # enableCruise is true
     ret.enableCruise = not ret.radarOffCan
     
     # set safety_hyundai_community only for non-SCC, MDPS harrness or SCC harrness cars or cars that have unknown issue
     if ret.radarOffCan or ret.mdpsBus == 1 or ret.openpilotLongitudinalControl or ret.sccBus == 1 or Params().get_bool('MadModeEnabled'):
       ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunity
+     
+    ret.radarDisablePossible = Params().get_bool('OpenpilotLongControlVisionOnly')
+    if ret.radarDisablePossible:
+      ret.safetyModel = car.CarParams.SafetyModel.hyundaiCommunityVisionOnly
+      ret.radarOffCan = True
+      if ret.fcaBus == 0:
+        ret.fcaBus = -1
     return ret
 
   def update(self, c, can_strings):
@@ -268,9 +274,9 @@ class CarInterface(CarInterfaceBase):
     ret.canValid = self.cp.can_valid and self.cp2.can_valid and self.cp_cam.can_valid
     ret.steeringRateLimited = self.CC.steer_rate_limited if self.CC is not None else False
 
-    if self.CP.enableCruise and not self.CC.scc_live:
+    if self.CP.enableCruise and not self.CC.radar_enabled:
       self.CP.enableCruise = False
-    elif self.CC.scc_live and not self.CP.enableCruise:
+    elif self.CC.radar_enabled and not self.CP.enableCruise:
       self.CP.enableCruise = True
 
     # most HKG cars has no long control, it is safer and easier to engage by main on
