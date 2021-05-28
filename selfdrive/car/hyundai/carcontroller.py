@@ -613,7 +613,7 @@ class CarController():
         self.fca11alivecnt = self.fca11maxcnt - self.fca11inc
         lead_objspd = CS.lead_objspd  # vRel (km/h)
         aReqValue = CS.scc12["aReqValue"]
-        if 0 < CS.out.radarDistance <= 149 and not self.radarDisableActivated:
+        if 0 < CS.out.radarDistance <= 149:
           if aReqValue > 0.:
             stock_weight = interp(CS.out.radarDistance, [3., 25.], [0.7, 0.])
           elif aReqValue < 0.:
