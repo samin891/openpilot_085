@@ -89,6 +89,7 @@ class CarController():
     self.accel_steady = 0
     self.accel_lim_prev = 0.
     self.accel_lim = 0.
+    self.steer_wind_down = 0
     self.steer_rate_limited = False
     self.usestockscc = True
     self.lead_visible = False
