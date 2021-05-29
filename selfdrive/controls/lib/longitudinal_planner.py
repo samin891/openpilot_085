@@ -168,7 +168,7 @@ class Planner():
     self.vego = v_ego
 
     long_control_state = sm['controlsState'].longControlState
-    if CP.sccBus == 2:
+    if CP.sccBus == 2 and not CP.radarDisablePossible:
       v_cruise_kph = sm['carState'].vSetDis
     else:
       v_cruise_kph = sm['controlsState'].vCruise

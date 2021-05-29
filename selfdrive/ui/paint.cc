@@ -476,6 +476,7 @@ static void ui_draw_vision_maxspeed_org(UIState *s) {
   const int SET_SPEED_NA = 255;
   float maxspeed = s->scene.controls_state.getVCruise();
   float cruise_speed = s->scene.vSetDis;
+  if (s->scene.radar_disable) cruise_speed = (*s->sm)["controlsState"].getControlsState().getVCruise();
   const bool is_cruise_set = maxspeed != 0 && maxspeed != SET_SPEED_NA;
   s->is_speed_over_limit = s->scene.limitSpeedCamera > 29 && ((s->scene.limitSpeedCamera+round(s->scene.limitSpeedCamera*0.01*s->scene.speed_lim_off))+1 < s->scene.car_state.getVEgo()*3.6);
   if (is_cruise_set && !s->scene.is_metric) { maxspeed *= 0.6225; }
@@ -495,7 +496,7 @@ static void ui_draw_vision_maxspeed_org(UIState *s) {
   ui_draw_rect(s->vg, rect, COLOR_WHITE_ALPHA(100), 10, 20.);
 
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
-  if (cruise_speed >= 30 && s->scene.controls_state.getEnabled()) {
+  if (cruise_speed >= 1 && s->scene.controls_state.getEnabled()) {
     const std::string cruise_speed_str = std::to_string((int)std::nearbyint(cruise_speed));
     ui_draw_text(s, rect.centerX(), int(s->viz_rect.y + (bdr_s))+65, cruise_speed_str.c_str(), 26 * 2.8, COLOR_WHITE_ALPHA(is_cruise_set ? 200 : 100), "sans-bold");
   } else {
@@ -1150,7 +1151,7 @@ static void ui_draw_vision_header(UIState *s) {
 
   ui_fill_rect(s->vg, {s->viz_rect.x, s->viz_rect.y, s->viz_rect.w, header_h}, gradient);
 
-  if (!s->scene.comma_stock_ui) {
+  if (!s->scene.comma_stock_ui && !s->scene.radar_disable) {
     ui_draw_vision_maxspeed(s);
     ui_draw_vision_cruise_speed(s);
   } else {
