@@ -7,12 +7,12 @@ hyundai_checksum = crcmod.mkCrcFun(0x11D, initCrc=0xFD, rev=False, xorOut=0xdf)
 
 
 def create_lkas11(packer, frame, car_fingerprint, apply_steer, steer_req,
-                  steer_wind_down, lkas11, sys_warning, sys_state, enabled,
+                  lkas11, sys_warning, sys_state, enabled,
                   left_lane, right_lane,
-                  left_lane_depart, right_lane_depart, bus):
+                  left_lane_depart, right_lane_depart, lfa_available, steer_wind_down, bus):
   values = lkas11
-  values["CF_Lkas_LdwsSysState"] = sys_state
-  values["CF_Lkas_SysWarning"] = 3 if sys_warning else 0
+  values["CF_Lkas_LdwsSysState"] = 3 if steer_req else sys_state
+  values["CF_Lkas_SysWarning"] = sys_warning
   values["CF_Lkas_LdwsLHWarning"] = left_lane_depart
   values["CF_Lkas_LdwsRHWarning"] = right_lane_depart
   values["CR_Lkas_StrToqReq"] = apply_steer
@@ -22,8 +22,12 @@ def create_lkas11(packer, frame, car_fingerprint, apply_steer, steer_req,
   else:
     values["CF_Lkas_ToiFlt"] = 0
   values["CF_Lkas_MsgCount"] = frame % 0x10
+  values["CF_Lkas_Chksum"] = 0
 
-  if car_fingerprint in FEATURES["send_lfahda_mfa"]:
+  if values["CF_Lkas_LdwsOpt_USM"] == 4:
+    values["CF_Lkas_LdwsOpt_USM"] = 3
+
+  if lfa_available or car_fingerprint in FEATURES["send_lfahda_mfa"]:
     values["CF_Lkas_LdwsActivemode"] = int(left_lane) + (int(right_lane) << 1)
     values["CF_Lkas_LdwsOpt_USM"] = 2
 
@@ -51,7 +55,6 @@ def create_lkas11(packer, frame, car_fingerprint, apply_steer, steer_req,
 
   if Params().get_bool("LdwsCarFix"):
   	values["CF_Lkas_LdwsOpt_USM"] = 3
-
   dat = packer.make_can_msg("LKAS11", 0, values)[2]
 
   if car_fingerprint in CHECKSUM["crc8"]:
@@ -69,12 +72,16 @@ def create_lkas11(packer, frame, car_fingerprint, apply_steer, steer_req,
 
   return packer.make_can_msg("LKAS11", bus, values)
 
-def create_clu11(packer, frame, clu11, button, speed = None, bus = 0):
+
+def create_clu11(packer, bus, clu11, button, speed, cnt):
   values = clu11
-  if speed != None:
+
+  if bus != 1:
+    values["CF_Clu_CruiseSwState"] = button
     values["CF_Clu_Vanz"] = speed
-  values["CF_Clu_CruiseSwState"] = button
-  values["CF_Clu_AliveCnt1"] = frame % 0x10
+  else:
+    values["CF_Clu_Vanz"] = speed
+  values["CF_Clu_AliveCnt1"] = cnt
   return packer.make_can_msg("CLU11", bus, values)
 
 def create_lfahda_mfc(packer, frame, enabled, hda_set_speed=0):
@@ -100,39 +107,41 @@ def create_lfahda_mfc(packer, frame, enabled, hda_set_speed=0):
 
   return packer.make_can_msg("LFAHDA_MFC", 0, values)
 
-def create_scc11(packer, enabled, frame, set_speed, lead_visible, radar_enabled, lead_dist, lead_vrel, lead_yrel,
-                 car_fingerprint, speed, standstill, gapsetting, sendaccmode, scc11cnt, scc11):
+def create_scc11(packer, enabled, set_speed, lead_visible, lead_dist, lead_vrel, lead_yrel, gapsetting, standstill,
+                 scc11, usestockscc, nosccradar, scc11cnt, sendaccmode):
   values = scc11
 
-  if not radar_enabled:
+  if not usestockscc:
+    if enabled:
+      values["VSetDis"] = set_speed
     if standstill:
       values["SCCInfoDisplay"] = 4
     else:
       values["SCCInfoDisplay"] = 0
     values["DriverAlertDisplay"] = 0
     values["TauGapSet"] = gapsetting
-    values["MainMode_ACC"] = sendaccmode
-    values["VSetDis"] = set_speed
     values["ObjValid"] = lead_visible
     values["ACC_ObjStatus"] = lead_visible
     values["ACC_ObjRelSpd"] = clip(lead_vrel if lead_visible else 0, -20., 20.)
     values["ACC_ObjDist"] = clip(lead_dist if lead_visible else 204.6, 0., 204.6)
     values["ACC_ObjLatPos"] = clip(-lead_yrel if lead_visible else 0, -170., 170.)
+
+    if nosccradar:
+      values["MainMode_ACC"] = sendaccmode
+      values["AliveCounterACC"] = scc11cnt
+  elif nosccradar:
     values["AliveCounterACC"] = scc11cnt
-  else:
-    values["AliveCounterACC"] = frame // 2 % 0x10  
+
   return packer.make_can_msg("SCC11", 0, values)
 
-def create_scc12(packer, apply_accel, enabled, radar_enabled, gaspressed, brakepressed, aebcmdact, car_fingerprint, speed, standstill, cnt, scc12):
+def create_scc12(packer, apply_accel, enabled, standstill, gaspressed, brakepressed, aebcmdact, scc12,
+                 usestockscc, nosccradar, cnt):
   values = scc12
-  if not aebcmdact:
-    if enabled and car_fingerprint in [CAR.NIRO_EV]:
+
+  if not usestockscc and not aebcmdact:
+    if enabled and not brakepressed:
       values["ACCMode"] = 2 if gaspressed and (apply_accel > -0.2) else 1
-      values["aReqRaw"] = apply_accel
-      values["aReqValue"] = apply_accel
-    elif enabled and not brakepressed:
-      values["ACCMode"] = 2 if gaspressed and (apply_accel > -0.2) else 1
-      if apply_accel < 0.0 and standstill and car_fingerprint == CAR.NIRO_HEV:
+      if apply_accel < 0.0 and standstill:
         values["StopReq"] = 1
       values["aReqRaw"] = apply_accel
       values["aReqValue"] = apply_accel
@@ -141,8 +150,15 @@ def create_scc12(packer, apply_accel, enabled, radar_enabled, gaspressed, brakep
       values["aReqRaw"] = 0
       values["aReqValue"] = 0
 
-  if not radar_enabled:
+    if nosccradar:
+      values["CR_VSM_Alive"] = cnt
+
+    values["CR_VSM_ChkSum"] = 0
+    dat = packer.make_can_msg("SCC12", 0, values)[2]
+    values["CR_VSM_ChkSum"] = 16 - sum([sum(divmod(i, 16)) for i in dat]) % 16
+  elif nosccradar:
     values["CR_VSM_Alive"] = cnt
+    values["CR_VSM_ChkSum"] = 0
     dat = packer.make_can_msg("SCC12", 0, values)[2]
     values["CR_VSM_ChkSum"] = 16 - sum([sum(divmod(i, 16)) for i in dat]) % 16
 
@@ -152,30 +168,28 @@ def create_scc13(packer, scc13):
   values = scc13
   return packer.make_can_msg("SCC13", 0, values)
 
-def create_scc14(packer, enabled, scc14, aebcmdact, lead_visible, lead_dist, v_ego, standstill, car_fingerprint):
+def create_scc14(packer, enabled, usestockscc, aebcmdact, accel, scc14, objgap, gaspressed, standstill, e_vgo, lead_visible, lead_dist):
   values = scc14
-  if enabled and not aebcmdact:
-    if car_fingerprint in [CAR.NIRO_EV, CAR.NIRO_HEV]:
+  if not usestockscc and not aebcmdact:
+    if enabled:
+      #values["ACCMode"] = 2 if gaspressed and (accel > -0.2) else 1
+      #values["ObjGap"] = objgap
+      values["ACCMode"] = 1 if enabled else 4 # stock will always be 4 instead of 0 after first disengage
+      values["ObjGap"] = int(min(lead_dist+2, 10)/2) if lead_visible else 0 # 1-5 based on distance to lead vehicle
       if standstill:
         values["JerkUpperLimit"] = 0.5
         values["JerkLowerLimit"] = 10.
         values["ComfortBandUpper"] = 0.
         values["ComfortBandLower"] = 0.
-        if v_ego > 0.27:
+        if e_vgo > 0.27:
           values["ComfortBandUpper"] = 2.
           values["ComfortBandLower"] = 0.
       else:
-        values["JerkUpperLimit"] = 50.
-        values["JerkLowerLimit"] = 50.
-        values["ComfortBandUpper"] = 50.
-        values["ComfortBandLower"] = 50.
-    else:
-      values["ComfortBandUpper"] = 0 # stock usually is 0 but sometimes uses higher values
-      values["ComfortBandLower"] = 0 # stock usually is 0 but sometimes uses higher values
-      values["JerkUpperLimit"] = 12.7 if enabled else 0 # stock usually is 1.0 but sometimes uses higher values
-      values["JerkLowerLimit"] = 12.7 if enabled else 0 # stock usually is 0.5 but sometimes uses higher values
-    values["ACCMode"] = 1 if enabled else 4 # stock will always be 4 instead of 0 after first disengage
-    values["ObjGap"] = int(min(lead_dist+2, 10)/2) if lead_visible else 0 # 1-5 based on distance to lead vehicle
+        values["ComfortBandUpper"] = 0 # stock usually is 0 but sometimes uses higher values
+        values["ComfortBandLower"] = 0 # stock usually is 0 but sometimes uses higher values
+        values["JerkUpperLimit"] = 12.7 if enabled else 0 # stock usually is 1.0 but sometimes uses higher values
+        values["JerkLowerLimit"] = 12.7 if enabled else 0 # stock usually is 0.5 but sometimes uses higher values
+
 
   return packer.make_can_msg("SCC14", 0, values)
 

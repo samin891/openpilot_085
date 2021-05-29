@@ -312,7 +312,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"CommaStockUI", PERSISTENT},
     {"OpkrEnableUploader", PERSISTENT},
     {"OpkrMapEnable", PERSISTENT},
-    {"OpenpilotLongControlVisionOnly", PERSISTENT},
+    {"MdpsHarness", PERSISTENT},
 };
 
 } // namespace

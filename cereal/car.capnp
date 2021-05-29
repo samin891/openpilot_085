@@ -470,18 +470,17 @@ struct CarParams {
   communityFeature @46: Bool;  # true if a community maintained feature is detected
   fingerprintSource @49: FingerprintSource;
   networkLocation @50 :NetworkLocation;  # Where Panda/C2 is integrated into the car's CAN network
-  mdpsBus @57: Int8;
+  mdpsHarness @57: Bool;
   sasBus @58: Int8;
-  sccBus @59: Int8;
-  fcaBus @60: Int8;
-  bsmAvailable @61: Bool;
-  lfaAvailable @62: Bool;
-  lvrAvailable @63: Bool;
-  evgearAvailable @64: Bool;
-  emsAvailable @65: Bool;
-  standStill @66: Bool;
-  vCruisekph @67: Float32;
-  radarDisablePossible @68: Bool;
+  fcaBus @59: Int8;
+  bsmAvailable @60: Bool;
+  lfaAvailable @61: Bool;
+  sccBus @62: Int8;
+  radarDisablePossible @63: Bool;
+  lvrAvailable @64: Bool;
+  evgearAvailable @65: Bool;
+  emsAvailable @66: Bool;
+  standStill @67: Bool;
 
   struct LateralParams {
     torqueBP @0 :List(Int32);

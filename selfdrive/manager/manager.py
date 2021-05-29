@@ -129,7 +129,7 @@ def manager_init():
     ("OpkrMonitorBlinkThreshold", "50"),
     ("MadModeEnabled", "1"),
     ("OpkrFanSpeedGain", "0"),
-    ("OpenpilotLongControlVisionOnly", "0"),
+    ("MdpsHarness", "1"),
   ]
 
   if TICI:
@@ -143,6 +143,14 @@ def manager_init():
   for k, v in default_params:
     if params.get(k) is None:
       params.put(k, v)
+
+  # panda code switch btw mdps and non-mdps for longcontrol by opkr
+  if not (os.system("cat /data/params/d/MdpsHarness | grep '0' ") == 0):
+    if not (os.system("cat -n /data/openpilot/panda/board/safety/safety_hyundai_community.h | grep '    12' | awk '{print $5}' | awk -F';' '{print $1}' | grep 'false' ") == 0):
+      os.system("cp -f /data/openpilot/panda/board/safety/safety_hyundai_community_non_mdps.h /data/openpilot/panda/board/safety/safety_hyundai_community.h")
+  elif not (os.system("cat /data/params/d/MdpsHarness | grep '1' ") == 0):
+    if not (os.system("cat -n /data/openpilot/panda/board/safety/safety_hyundai_community.h | grep '    12' | awk '{print $5}' | awk -F';' '{print $1}' | grep 'true' ") == 0):
+      os.system("cp -f /data/openpilot/panda/board/safety/safety_hyundai_community_mdps.h /data/openpilot/panda/board/safety/safety_hyundai_community.h")
 
   # is this dashcam?
   if os.getenv("PASSIVE") is not None:

@@ -18,9 +18,11 @@ const CanMsg HYUNDAI_TX_MSGS[] = {
   {1427, 0, 6},   // TPMS, Bus 0
  };
 
+// TODO: missing checksum for wheel speeds message,worst failure case is
+//       wheel speeds stuck at 0 and we don't disengage on brake press
 AddrCheckStruct hyundai_rx_checks[] = {
   {.msg = {{608, 0, 8, .check_checksum = true, .max_counter = 3U, .expected_timestep = 10000U}}},
-  {.msg = {{902, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 10000U}}},
+  {.msg = {{902, 0, 8, .check_checksum = false, .max_counter = 15U, .expected_timestep = 10000U}}},
   {.msg = {{916, 0, 8, .check_checksum = true, .max_counter = 7U, .expected_timestep = 10000U}}},
   {.msg = {{1057, 0, 8, .check_checksum = true, .max_counter = 15U, .expected_timestep = 20000U}}},
 };
@@ -62,8 +64,6 @@ static uint8_t hyundai_get_checksum(CAN_FIFOMailBox_TypeDef *to_push) {
   uint8_t chksum;
   if (addr == 608) {
     chksum = GET_BYTE(to_push, 7) & 0xF;
-  } else if (addr == 902) {
-    chksum = ((GET_BYTE(to_push, 7) >> 6) << 2) | (GET_BYTE(to_push, 5) >> 6);
   } else if (addr == 916) {
     chksum = GET_BYTE(to_push, 6) & 0xF;
   } else if (addr == 1057) {
@@ -78,36 +78,15 @@ static uint8_t hyundai_compute_checksum(CAN_FIFOMailBox_TypeDef *to_push) {
   int addr = GET_ADDR(to_push);
 
   uint8_t chksum = 0;
-  if (addr == 902) {
-    // count the bits
-    for (int i = 0; i < 8; i++) {
-      uint8_t b = GET_BYTE(to_push, i);
-      for (int j = 0; j < 8; j++) {
-        uint8_t bit = 0;
-        // exclude checksum and counter
-        if (((i != 1) || (j < 6)) && ((i != 3) || (j < 6)) && ((i != 5) || (j < 6)) && ((i != 7) || (j < 6))) {
-          bit = (b >> (uint8_t)j) & 1U;
-        }
-        chksum += bit;
-      }
+  // same algorithm, but checksum is in a different place
+  for (int i = 0; i < 8; i++) {
+    uint8_t b = GET_BYTE(to_push, i);
+    if (((addr == 608) && (i == 7)) || ((addr == 916) && (i == 6)) || ((addr == 1057) && (i == 7))) {
+      b &= (addr == 1057) ? 0x0FU : 0xF0U; // remove checksum
     }
-    chksum = (chksum ^ 9U) & 15U;
-  } else {
-    // sum of nibbles
-    for (int i = 0; i < 8; i++) {
-      if ((addr == 916) && (i == 7)) {
-        continue; // exclude
-      }
-      uint8_t b = GET_BYTE(to_push, i);
-      if (((addr == 608) && (i == 7)) || ((addr == 916) && (i == 6)) || ((addr == 1057) && (i == 7))) {
-        b &= (addr == 1057) ? 0x0FU : 0xF0U; // remove checksum
-      }
-      chksum += (b % 16U) + (b / 16U);
-    }
-    chksum = (16U - (chksum %  16U)) % 16U;
+    chksum += (b % 16U) + (b / 16U);
   }
-
-  return chksum;
+  return (16U - (chksum %  16U)) % 16U;
 }
 
 static int hyundai_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {

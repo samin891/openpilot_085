@@ -19,6 +19,8 @@ from selfdrive.controls.lib.long_mpc import LongitudinalMpc
 from selfdrive.controls.lib.drive_helpers import V_CRUISE_MAX
 from selfdrive.controls.lib.long_mpc_model import LongitudinalMpcModel
 
+from selfdrive.car.hyundai.spdcontroller  import SpdController
+
 LON_MPC_STEP = 0.2  # first step is 0.2s
 AWARENESS_DECEL = -0.2     # car smoothly decel at .2m/s^2 when user is distracted
 
@@ -118,7 +120,9 @@ class Planner():
     self.params = Params()
     self.first_loop = True
 
+    self.map_enable = False
     self.target_speed_map = 0.0
+    self.target_speed_map_to_send = 0.0
     self.target_speed_map_counter = 0
     self.target_speed_map_counter_check = False
     self.target_speed_map_counter1 = 0
@@ -129,6 +133,9 @@ class Planner():
     self.target_speed_map_sign = False
     self.tartget_speed_offset = int(self.params.get("OpkrSpeedLimitOffset", encoding="utf8"))
     self.vego = 0
+
+    self.SC = SpdController()
+    self.curv_speed = 0
 
   def choose_solution(self, v_cruise_setpoint, enabled, model_enabled):
     possible_futures = [self.mpc1.v_mpc_future, self.mpc2.v_mpc_future, v_cruise_setpoint]
@@ -168,8 +175,13 @@ class Planner():
     self.vego = v_ego
 
     long_control_state = sm['controlsState'].longControlState
+
+    self.curv_speed = self.SC.cal_curve_speed(sm, v_ego)
+    self.target_curv_speed = interp(abs(self.curv_speed), [30, 60, 90, 255], [40, 55, 75, 255])
     if CP.sccBus == 2 and not CP.radarDisablePossible:
       v_cruise_kph = sm['carState'].vSetDis
+    elif sm['controlsState'].vCruiseSetPoint > 29 or self.target_curv_speed < v_ego*CV.MS_TO_KPH:
+      v_cruise_kph = sm['controlsState'].vCruiseSetPoint if sm['controlsState'].vCruiseSetPoint < self.target_curv_speed else self.target_curv_speed
     else:
       v_cruise_kph = sm['controlsState'].vCruise
     force_slow_decel = sm['controlsState'].forceDecel
