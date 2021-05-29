@@ -129,12 +129,17 @@ class LongControl():
       # added by opkr
       afactor = interp(CS.vEgo,[0,1,2,3,4,8,12,16,20], [4.5,4.0,3.65,3.375,3.1,2.3,2.1,2,2])
       vfactor = interp(dRel,[1,30,50], [15,7,4])
-      dfactor = interp(dRel,[4,10], [1.6,1])
+      dfactor = interp(dRel,[4.,25.], [1.,0.])
       dvfactor = interp(((CS.vEgo*3.6)/(max(3,dRel))),[1,2,3], [1,3,5])
+      #if vRel < 0:
+      #  vRel_weight = interp(abs(vRel*3.6), [0, 20], [1, 2])
+      #  dfactor = interp(CS.out.radarDistance, [4. * vRel_weight, 25. * vRel_weight], [1., 0.])
 
       # if abs(output_gb) < abs(a_target_raw)/afactor and a_target_raw < 0 and dRel >= 4.0:
       #   output_gb = (-abs(a_target_raw)/afactor)*dfactor
-      if output_gb > 0 and a_target_raw < 0 and dRel >= 4.0:
+      if CP.radarDisablePossible and output_gb < 0 and abs(output_gb) < abs(a_target_raw) and a_target_raw < 0:
+        output_gb = output_gb * (1. - dfactor) + a_target_raw * dfactor
+      elif output_gb > 0 and a_target_raw < 0 and dRel >= 4.0:
         output_gb = output_gb/vfactor
       elif output_gb > 0 and a_target_raw > 0 and dRel >= 4.0 and (CS.vEgo*3.6) < 65:
         output_gb = output_gb/dvfactor
