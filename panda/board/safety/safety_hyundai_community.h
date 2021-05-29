@@ -199,6 +199,16 @@ static int hyundai_community_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       cruise_engaged_prev = cruise_engaged;
     }
 
+    // engage for vision only car
+    if ((addr == 1265) && hyundai_community_vision_only_car) {
+      // first byte
+      int cruise_engaged = (GET_BYTES_04(to_push) & 0x7);
+      // enable on res+ or set- buttons press
+      if (!controls_allowed && (cruise_engaged == 1 || cruise_engaged == 2)) {
+        controls_allowed = 1;
+      }
+    }
+
     // sample wheel speed, averaging opposite corners
     if (addr == 902 && bus == 0) {
       int hyundai_speed = GET_BYTES_04(to_push) & 0x3FFF;  // FL
@@ -206,12 +216,6 @@ static int hyundai_community_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
       hyundai_speed /= 2;
       vehicle_moving = hyundai_speed > HYUNDAI_STANDSTILL_THRSLD;
     }
-
-    if (addr == 916) {
-      gas_pressed = ((GET_BYTE(to_push, 5) >> 5) & 0x3) == 1;
-      brake_pressed = (GET_BYTE(to_push, 6) >> 7) != 0;
-    }
-
     generic_rx_checks((addr == 832 && bus == 0));
   }
     // monitor AEB active command to bypass panda accel safety, don't block AEB

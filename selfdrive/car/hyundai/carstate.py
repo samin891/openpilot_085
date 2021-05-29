@@ -108,8 +108,8 @@ class CarState(CarStateBase):
 
     # cruise state
     if not self.CP.enableCruise:
-      if self.cruise_main_button != 0:
-        self.allow_nonscc_available = not self.allow_nonscc_available
+      if self.cruise_buttons == 1 or self.cruise_buttons == 2 or self.cruise_main_button != 0:
+        self.allow_nonscc_available = True
         self.brake_check = 0
         self.cancel_check = 0
       ret.cruiseState.available = self.allow_nonscc_available != 0
