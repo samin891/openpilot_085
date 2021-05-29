@@ -279,7 +279,7 @@ class CarController():
 
     can_sends = []
 
-    self.lfa_available = True if self.lfainFingerprint or self.car_fingerprint in FEATURES["send_lfa_mfa"] else False
+    self.lfa_available = True if self.lfainFingerprint or self.car_fingerprint in FEATURES["send_lfahda_mfa"] else False
 
     can_sends.append(create_lkas11(self.packer, frame, self.car_fingerprint, apply_steer, lkas_active,
                                    CS.lkas11, sys_warning, sys_state, enabled,
