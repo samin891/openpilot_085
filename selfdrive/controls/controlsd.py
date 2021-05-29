@@ -391,8 +391,6 @@ class Controls:
     self.CP.enableCruise = self.CI.CP.enableCruise
     if not self.CP.enableCruise:
       self.v_cruise_kph = update_v_cruise(self.v_cruise_kph, CS.vEgo, CS.gasPressed, CS.buttonEvents, self.enabled, self.is_metric)
-      if int(CS.vSetDis)-1 > self.v_cruise_kph:
-        self.v_cruise_kph = int(CS.vSetDis)
     elif self.CP.enableCruise and CS.cruiseState.enabled:
       if Params().get_bool('OpkrVariableCruise') and CS.cruiseState.modeSel != 0 and self.CP.vCruisekph > 30:
         self.v_cruise_kph = self.CP.vCruisekph

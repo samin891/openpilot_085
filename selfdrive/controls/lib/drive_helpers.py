@@ -10,7 +10,7 @@ PrevGaspressed = False
 
 # kph
 FIRST_PRESS_TIME = 1
-LONG_PRESS_TIME = 60
+LONG_PRESS_TIME = 70
 
 V_CRUISE_MAX = 160
 V_CRUISE_MIN = 1
