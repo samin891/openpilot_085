@@ -3,6 +3,7 @@ from common.realtime import DT_CTRL
 from common.numpy_fast import clip
 from common.numpy_fast import interp
 from selfdrive.car import apply_std_steer_torque_limits
+from selfdrive.car.hyundai.carstate import GearShifter
 from selfdrive.car.hyundai.hyundaican import create_lkas11, create_clu11, create_lfahda_mfc, \
                                              create_scc11, create_scc12, create_scc13, create_scc14, \
                                              create_scc42a, create_scc7d0, create_fca11, create_fca12, create_mdps12
@@ -273,9 +274,9 @@ class CarController():
 
     # disable if steer angle reach 90 deg, otherwise mdps fault in some models
     if self.opkr_maxanglelimit >= 90 and not self.steer_wind_down_enabled:
-      lkas_active = enabled and abs(CS.out.steeringAngleDeg) < self.opkr_maxanglelimit
+      lkas_active = enabled and abs(CS.out.steeringAngleDeg) < self.opkr_maxanglelimit and CS.out.gearShifter == GearShifter.drive
     else:
-      lkas_active = enabled and not CS.out.steerWarning
+      lkas_active = enabled and not CS.out.steerWarning and CS.out.gearShifter == GearShifter.drive
 
     if (( CS.out.leftBlinker and not CS.out.rightBlinker) or ( CS.out.rightBlinker and not CS.out.leftBlinker)) and CS.out.vEgo < LANE_CHANGE_SPEED_MIN and self.opkr_turnsteeringdisable:
       self.lanechange_manual_timer = 50
@@ -328,7 +329,7 @@ class CarController():
 
     clu11_speed = CS.clu11["CF_Clu_Vanz"]
     enabled_speed = 38 if CS.is_set_speed_in_mph  else 60
-    if clu11_speed > enabled_speed or not lkas_active:
+    if clu11_speed > enabled_speed or not lkas_active or CS.out.gearShifter != GearShifter.drive:
       enabled_speed = clu11_speed
 
     can_sends = []
@@ -554,8 +555,6 @@ class CarController():
               vRel_weight = interp(abs(lead_objspd), [0, 20], [1, 2])
               stock_weight = interp(CS.out.radarDistance, [3. ** vRel_weight, 25. * vRel_weight], [1., 0.])
           else:
-            stock_weight = 0.
-          if self.car_fingerprint == CAR.NIRO_HEV and CS.out.vEgo * CV.MS_TO_KPH <= 11:
             stock_weight = 0.
           apply_accel = apply_accel * (1. - stock_weight) + aReqValue * stock_weight
         else:

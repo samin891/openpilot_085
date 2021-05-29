@@ -22,7 +22,7 @@ class CarInterface(CarInterfaceBase):
 
   @staticmethod
   def compute_gb(accel, speed):
-    return float(accel) / 3.0
+    return float(accel) / 3.5
 
   @staticmethod
   def get_params(candidate, fingerprint=gen_empty_fingerprint(), car_fw=[]):  # pylint: disable=dangerous-default-value
@@ -231,7 +231,7 @@ class CarInterface(CarInterfaceBase):
     ret.enableBsm = 0x58b in fingerprint[0]
 
     ret.stoppingControl = True
-    ret.startAccel = 1.1
+    ret.startAccel = 0.8
 
     ret.standStill = False
     ret.vCruisekph = 0
